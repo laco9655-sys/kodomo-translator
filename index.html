@@ -186,7 +186,7 @@
 <script>
 (() => {
   const qs = new URLSearchParams(location.search);
-  const BRIDGE_BASE_URL = qs.get('bridge') || '';
+  const BRIDGE_BASE_URL = qs.get('bridge') || qs.get('api') || '';
   const ROOM = (qs.get('room') || 'main').replace(/[^a-zA-Z0-9_-]/g,'').slice(0,40) || 'main';
   const DEVICE_ID = getDeviceId();
   let PASSCODE = localStorage.getItem('translator_passcode') || '';
