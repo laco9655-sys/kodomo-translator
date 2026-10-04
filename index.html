@@ -5,68 +5,127 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>日本語 ⇄ タガログ語 こども通訳</title>
 <style>
-  :root { --blue:#2f80ff; --blue-soft:#eaf3ff; --pink:#ff6f8e; --pink-soft:#fff0f4; --green:#34c77b; --ink:#1d2b3a; --sub:#6f8092; --line:#dce6ef; --bg:#f4f8fb; --bottom:210px; }
-  * { box-sizing:border-box; }
-  html,body { height:100%; }
-  body { margin:0; font-family:system-ui,-apple-system,"Noto Sans JP","Yu Gothic",sans-serif; background:var(--bg); color:var(--ink); overflow:hidden; }
-  button { font:inherit; }
-  header { height:72px; display:flex; align-items:center; justify-content:space-between; padding:0 18px; background:linear-gradient(90deg,#1174f4,#2ca6ff); color:white; box-shadow:0 2px 12px rgba(0,0,0,.12); position:relative; z-index:5; }
-  .title { font-weight:900; font-size:clamp(18px,3.4vw,28px); }
-  .meta { font-size:12px; opacity:.9; text-align:right; }
-  #chat { height:calc(100vh - 72px); overflow:auto; padding:26px 22px calc(var(--bottom) + 30px); scroll-behavior:smooth; }
-  .row { display:flex; width:100%; margin-bottom:26px; }
-  .row.left { justify-content:flex-start; padding-right:16%; }
-  .row.right { justify-content:flex-end; padding-left:16%; }
-  .bubble { position:relative; width:min(690px,84vw); border-radius:22px; padding:15px 18px 14px; box-shadow:0 5px 18px rgba(25,55,80,.08); border:1px solid rgba(0,0,0,.04); }
-  .left .bubble { background:var(--blue-soft); }
-  .right .bubble { background:var(--pink-soft); }
-  .left .bubble::before { content:""; position:absolute; left:-12px; top:24px; border-width:10px 13px 10px 0; border-style:solid; border-color:transparent var(--blue-soft) transparent transparent; }
-  .right .bubble::before { content:""; position:absolute; right:-12px; top:24px; border-width:10px 0 10px 13px; border-style:solid; border-color:transparent transparent transparent var(--pink-soft); }
-  .bubble-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px; }
-  .lang { font-weight:900; font-size:13px; letter-spacing:.02em; }
-  .time { color:var(--sub); font-size:11px; white-space:nowrap; }
-  .source { font-size:clamp(18px,3.2vw,25px); font-weight:850; line-height:1.5; }
-  .pron { margin-top:4px; font-size:14px; color:#557086; line-height:1.45; }
-  .divider { height:1px; background:rgba(50,80,100,.13); margin:12px 0; }
-  .translation-line { display:flex; align-items:flex-start; gap:10px; }
-  .translation { flex:1; }
-  .translation .label { font-size:11px; color:var(--sub); font-weight:800; }
-  .translation .text { font-size:17px; font-weight:750; line-height:1.5; margin-top:2px; }
-  .speak { border:0; background:white; width:42px; height:42px; border-radius:50%; box-shadow:0 2px 9px rgba(0,0,0,.10); cursor:pointer; font-size:20px; }
-  .system { margin:18px auto 26px; width:max-content; max-width:88%; padding:10px 16px; border-radius:999px; background:#fff5cf; color:#725a00; font-size:13px; text-align:center; }
-  #controls { position:fixed; left:0; right:0; bottom:0; z-index:10; padding:10px max(12px, env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); background:rgba(255,255,255,.96); backdrop-filter:blur(12px); border-top:1px solid var(--line); box-shadow:0 -8px 25px rgba(35,65,85,.08); }
-  .quick-wrap { display:flex; justify-content:center; gap:12px; margin-bottom:10px; }
-  .quick { width:min(260px,42vw); min-height:78px; border:0; border-radius:20px; color:white; font-weight:900; cursor:pointer; box-shadow:0 5px 14px rgba(0,0,0,.11); }
-  .quick.good { background:var(--green); }
-  .quick.bad { background:var(--pink); }
-  .quick .ja { display:block; font-size:22px; }
-  .quick .fil { display:block; font-size:13px; margin-top:2px; opacity:.98; }
-  .quick .kata { display:block; font-size:11px; margin-top:1px; opacity:.9; }
-  .mics { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-  .mic { min-height:66px; border:0; border-radius:18px; cursor:pointer; font-weight:900; font-size:17px; color:white; }
-  .mic.fil { background:var(--blue); }
-  .mic.ja { background:#ef5c7d; }
-  .mic.recording { animation:pulse 1s infinite; outline:4px solid rgba(255,0,0,.16); }
-  @keyframes pulse { 50% { transform:scale(.985); opacity:.86; } }
-  .status { position:fixed; top:82px; left:50%; transform:translateX(-50%); z-index:20; padding:9px 15px; border-radius:999px; background:#203246; color:white; font-size:13px; opacity:0; pointer-events:none; transition:.2s; max-width:90%; text-align:center; }
-  .status.show { opacity:.94; }
-  #codeOverlay { position:fixed; inset:0; z-index:99; background:rgba(20,34,48,.55); display:none; place-items:center; padding:20px; }
-  #codeOverlay.show { display:grid; }
-  .code-card { width:min(430px,100%); background:white; border-radius:24px; padding:26px; box-shadow:0 20px 70px rgba(0,0,0,.2); }
-  .code-card h2 { margin:0 0 8px; }
-  .code-card p { color:var(--sub); line-height:1.5; }
-  .code-card input { width:100%; font-size:24px; padding:14px; border:2px solid var(--line); border-radius:14px; text-align:center; letter-spacing:.15em; }
-  .code-card button { width:100%; margin-top:12px; border:0; border-radius:14px; background:var(--blue); color:white; padding:15px; font-weight:900; font-size:17px; }
-  @media (max-width:600px) {
-    :root { --bottom:224px; }
-    header { height:64px; padding:0 12px; }
-    #chat { height:calc(100vh - 64px); padding:20px 14px calc(var(--bottom) + 24px); }
-    .row.left { padding-right:8%; }
-    .row.right { padding-left:8%; }
-    .bubble { width:88vw; padding:13px 14px; border-radius:18px; }
-    .quick { min-height:80px; }
-    .mic { font-size:15px; }
-    .meta { display:none; }
+  :root{
+    --blue:#2f80ff; --blue2:#0f6fe8; --blue-soft:#eaf3ff;
+    --pink:#ff6588; --pink2:#e94b71; --pink-soft:#fff0f4;
+    --green:#35c878; --ink:#1c2b39; --sub:#697b8d; --line:#dbe5ee;
+    --bg:#f5f8fb; --controls:286px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;font-family:system-ui,-apple-system,"Noto Sans JP","Yu Gothic",sans-serif;background:var(--bg);color:var(--ink);overflow:hidden}
+  button,input,textarea{font:inherit}
+  button{-webkit-tap-highlight-color:transparent}
+  header{
+    height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;
+    color:white;background:linear-gradient(90deg,#1475ef,#21a2ff);
+    box-shadow:0 2px 12px rgba(0,0,0,.10);position:relative;z-index:4
+  }
+  .title{font-size:clamp(18px,3vw,27px);font-weight:950}
+  .meta{font-size:12px;opacity:.92;text-align:right}
+  #chat{
+    height:calc(100vh - 68px);overflow:auto;padding:24px 22px calc(var(--controls) + 30px);
+    scroll-behavior:smooth
+  }
+  .row{display:flex;width:100%;margin-bottom:22px}
+  .row.left{justify-content:flex-start;padding-right:16%}
+  .row.right{justify-content:flex-end;padding-left:16%}
+  .bubble{
+    position:relative;width:min(700px,84vw);border-radius:22px;padding:14px 17px 13px;
+    border:1px solid rgba(20,50,75,.06);box-shadow:0 4px 15px rgba(25,55,80,.07)
+  }
+  .left .bubble{background:var(--blue-soft)}
+  .right .bubble{background:var(--pink-soft)}
+  .left .bubble::before{
+    content:"";position:absolute;left:-12px;top:22px;border-width:10px 13px 10px 0;border-style:solid;
+    border-color:transparent var(--blue-soft) transparent transparent
+  }
+  .right .bubble::before{
+    content:"";position:absolute;right:-12px;top:22px;border-width:10px 0 10px 13px;border-style:solid;
+    border-color:transparent transparent transparent var(--pink-soft)
+  }
+  .bubble-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:6px}
+  .lang{font-size:12px;font-weight:900}.time{font-size:11px;color:var(--sub)}
+  .source{font-size:clamp(18px,3vw,25px);font-weight:900;line-height:1.45}
+  .pron{margin-top:4px;font-size:14px;color:#587188;line-height:1.42}
+  .divider{height:1px;background:rgba(50,80,100,.12);margin:10px 0}
+  .translation-line{display:flex;gap:10px;align-items:flex-start}
+  .translation{flex:1}.translation .label{font-size:11px;color:var(--sub);font-weight:850}
+  .translation .text{font-size:17px;font-weight:800;line-height:1.5;margin-top:2px}
+  .speak{
+    border:0;background:white;width:44px;height:44px;border-radius:50%;cursor:pointer;font-size:20px;
+    box-shadow:0 2px 9px rgba(0,0,0,.10)
+  }
+  .system{
+    margin:16px auto 22px;width:max-content;max-width:88%;padding:10px 16px;border-radius:999px;
+    background:#fff4c9;color:#745a00;font-size:13px;text-align:center
+  }
+  #controls{
+    position:fixed;left:0;right:0;bottom:0;z-index:10;
+    background:rgba(255,255,255,.97);backdrop-filter:blur(14px);
+    border-top:1px solid var(--line);box-shadow:0 -8px 24px rgba(35,65,85,.08);
+    padding:10px max(12px,env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))
+  }
+  .quick-wrap{display:flex;justify-content:center;gap:10px;margin-bottom:9px}
+  .quick{
+    width:min(260px,42vw);min-height:64px;border:0;border-radius:18px;color:white;font-weight:950;
+    cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.10)
+  }
+  .quick.good{background:var(--green)} .quick.bad{background:var(--pink)}
+  .quick .ja{display:block;font-size:19px}.quick .fil{display:block;font-size:12px;margin-top:1px}
+  .quick .kata{display:block;font-size:10px;margin-top:1px;opacity:.9}
+  .text-box{
+    display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;margin:0 auto 9px;
+    max-width:980px
+  }
+  .lang-toggle{display:flex;border:1px solid var(--line);border-radius:14px;padding:3px;background:#f4f7fa}
+  .lang-toggle button{
+    border:0;border-radius:10px;padding:9px 11px;background:transparent;color:var(--sub);font-weight:900;cursor:pointer
+  }
+  .lang-toggle button.active.ja{background:var(--pink);color:white}
+  .lang-toggle button.active.fil{background:var(--blue);color:white}
+  #textInput{
+    width:100%;height:46px;resize:none;border:2px solid var(--line);border-radius:14px;padding:10px 12px;
+    outline:none;line-height:1.35;background:white
+  }
+  #textInput:focus{border-color:#77adff;box-shadow:0 0 0 3px rgba(47,128,255,.10)}
+  #sendText{
+    height:46px;border:0;border-radius:14px;background:#26384b;color:white;font-weight:900;padding:0 17px;cursor:pointer
+  }
+  .hold-help{text-align:center;color:var(--sub);font-size:12px;font-weight:800;margin:2px 0 7px}
+  .mics{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .mic{
+    min-height:72px;border:0;border-radius:20px;color:white;font-weight:950;font-size:17px;cursor:pointer;
+    touch-action:none;user-select:none;-webkit-user-select:none;box-shadow:0 4px 14px rgba(0,0,0,.10)
+  }
+  .mic.fil{background:linear-gradient(135deg,var(--blue),var(--blue2))}
+  .mic.ja{background:linear-gradient(135deg,var(--pink),var(--pink2))}
+  .mic .sub{display:block;font-size:11px;margin-top:2px;opacity:.9}
+  .mic.recording{
+    transform:scale(.985);outline:5px solid rgba(255,60,80,.15);animation:pulse .8s infinite
+  }
+  @keyframes pulse{50%{filter:brightness(.92)}}
+  .status{
+    position:fixed;top:78px;left:50%;transform:translateX(-50%);z-index:20;padding:9px 15px;border-radius:999px;
+    background:#203246;color:white;font-size:13px;opacity:0;pointer-events:none;transition:.2s;max-width:90%;text-align:center
+  }
+  .status.show{opacity:.95}
+  #codeOverlay{position:fixed;inset:0;z-index:99;background:rgba(20,34,48,.55);display:none;place-items:center;padding:20px}
+  #codeOverlay.show{display:grid}
+  .code-card{width:min(430px,100%);background:white;border-radius:24px;padding:26px;box-shadow:0 20px 70px rgba(0,0,0,.2)}
+  .code-card h2{margin:0 0 8px}.code-card p{color:var(--sub);line-height:1.5}
+  .code-card input{width:100%;font-size:24px;padding:14px;border:2px solid var(--line);border-radius:14px;text-align:center;letter-spacing:.15em}
+  .code-card button{width:100%;margin-top:12px;border:0;border-radius:14px;background:var(--blue);color:white;padding:15px;font-weight:900;font-size:17px}
+  @media(max-width:650px){
+    :root{--controls:328px}
+    header{height:62px;padding:0 12px}
+    #chat{height:calc(100vh - 62px);padding:18px 13px calc(var(--controls) + 22px)}
+    .meta{display:none}.row.left{padding-right:7%}.row.right{padding-left:7%}
+    .bubble{width:89vw;border-radius:18px;padding:12px 14px}
+    .quick{min-height:67px}.quick .ja{font-size:17px}
+    .text-box{grid-template-columns:1fr auto}.lang-toggle{grid-column:1/-1}
+    .lang-toggle button{flex:1}.lang-toggle{display:flex}
+    #sendText{padding:0 15px}.mic{font-size:15px;min-height:70px}
   }
 </style>
 </head>
@@ -75,18 +134,46 @@
   <div class="title">🇯🇵 ⇄ 🇵🇭 こども通訳</div>
   <div class="meta">共有履歴ON<br>こども安全フィルターON</div>
 </header>
+
 <div id="status" class="status"></div>
 <main id="chat"></main>
+
 <section id="controls">
   <div class="quick-wrap">
-    <button id="understood" class="quick good"><span class="ja">✓ わかった</span><span class="fil">Naiintindihan ko.</span><span class="kata">ナイインティンディハン コ</span></button>
-    <button id="notUnderstood" class="quick bad"><span class="ja">？ わからない</span><span class="fil">Hindi ko naiintindihan.</span><span class="kata">ヒンディ コ ナイインティンディハン</span></button>
+    <button id="understood" class="quick good">
+      <span class="ja">✓ わかった</span>
+      <span class="fil">Naiintindihan ko.</span>
+      <span class="kata">ナイインティンディハン コ</span>
+    </button>
+    <button id="notUnderstood" class="quick bad">
+      <span class="ja">？ わからない</span>
+      <span class="fil">Hindi ko naiintindihan.</span>
+      <span class="kata">ヒンディ コ ナイインティンディハン</span>
+    </button>
   </div>
+
+  <div class="text-box">
+    <div class="lang-toggle">
+      <button id="textJa" class="active ja" type="button">🇯🇵 日本語</button>
+      <button id="textFil" class="fil" type="button">🇵🇭 Tagalog</button>
+    </div>
+    <textarea id="textInput" rows="1" placeholder="文字でも入力できます"></textarea>
+    <button id="sendText" type="button">送信</button>
+  </div>
+
+  <div class="hold-help">🎙 ボタンを <b>押している間だけ</b> 録音します。離すと翻訳します。</div>
   <div class="mics">
-    <button id="micFil" class="mic fil">🎙 タガログ語で話す</button>
-    <button id="micJa" class="mic ja">🎙 日本語で話す</button>
+    <button id="micFil" class="mic fil" type="button">
+      🎙 タガログ語で話す
+      <span class="sub">Pindutin habang nagsasalita</span>
+    </button>
+    <button id="micJa" class="mic ja" type="button">
+      🎙 日本語で話す
+      <span class="sub">押している間だけ録音</span>
+    </button>
   </div>
 </section>
+
 <div id="codeOverlay">
   <div class="code-card">
     <h2>教室の合言葉</h2>
@@ -95,21 +182,41 @@
     <button id="passOk">はじめる</button>
   </div>
 </div>
+
 <script>
 (() => {
   const qs = new URLSearchParams(location.search);
-  const GAS_URL = qs.get('api') || '';
+  const BRIDGE_BASE_URL = qs.get('bridge') || '';
   const ROOM = (qs.get('room') || 'main').replace(/[^a-zA-Z0-9_-]/g,'').slice(0,40) || 'main';
   const DEVICE_ID = getDeviceId();
   let PASSCODE = localStorage.getItem('translator_passcode') || '';
+
   let recorder = null, stream = null, chunks = [], recordingLang = null, stopTimer = null, busy = false;
+  let textLang = 'ja';
   const seen = new Set();
+  const audioCache = new Map();
+  let audioCtx = null;
+
   const chat = document.getElementById('chat');
   const statusEl = document.getElementById('status');
   const micJa = document.getElementById('micJa');
   const micFil = document.getElementById('micFil');
+  const textInput = document.getElementById('textInput');
+  const textJa = document.getElementById('textJa');
+  const textFil = document.getElementById('textFil');
 
-  if (!GAS_URL) { showSystem('GAS URLがありません。GASの入口URLから開いてください。'); disableControls(true); return; }
+  const CHANNEL = 'kodomo-translator-v6';
+  const CLIENT_NONCE = (crypto.randomUUID ? crypto.randomUUID() : 'n-' + Date.now() + '-' + Math.random().toString(36).slice(2));
+  const pending = new Map();
+  let bridgeWindow = null, bridgeReady = false, requestSeq = 0;
+
+  if (!BRIDGE_BASE_URL) {
+    showSystem('GAS Bridge URLがありません。GASの入口URLから開いてください。');
+    disableControls(true);
+    return;
+  }
+
+  installBridge();
   if (!PASSCODE) showCodeOverlay(true);
 
   document.getElementById('passOk').addEventListener('click', async () => {
@@ -118,127 +225,329 @@
     localStorage.setItem('translator_passcode', PASSCODE);
     showCodeOverlay(false);
     const ok = await ping();
-    if (!ok) { localStorage.removeItem('translator_passcode'); PASSCODE = ''; showCodeOverlay(true); }
-    else await loadHistory(true);
+    if (!ok) {
+      localStorage.removeItem('translator_passcode');
+      PASSCODE = '';
+      showCodeOverlay(true);
+    } else {
+      await loadHistory(true);
+    }
   });
 
-  micJa.addEventListener('click', () => toggleRecord('ja'));
-  micFil.addEventListener('click', () => toggleRecord('fil'));
-  document.getElementById('understood').addEventListener('click', () => sendQuick('understood'));
-  document.getElementById('notUnderstood').addEventListener('click', () => sendQuick('not_understood'));
+  bindHoldToTalk(micJa, 'ja');
+  bindHoldToTalk(micFil, 'fil');
+
+  document.getElementById('understood').addEventListener('click', async () => {
+    await unlockAudio();
+    sendQuick('understood');
+  });
+  document.getElementById('notUnderstood').addEventListener('click', async () => {
+    await unlockAudio();
+    sendQuick('not_understood');
+  });
+
+  textJa.addEventListener('click', () => setTextLang('ja'));
+  textFil.addEventListener('click', () => setTextLang('fil'));
+  document.getElementById('sendText').addEventListener('click', async () => {
+    await unlockAudio();
+    sendText();
+  });
+  textInput.addEventListener('keydown', async (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      await unlockAudio();
+      sendText();
+    }
+  });
 
   setTimeout(async () => {
     if (PASSCODE) {
       const ok = await ping();
       if (ok) await loadHistory(true);
-      else { PASSCODE = ''; localStorage.removeItem('translator_passcode'); showCodeOverlay(true); }
+      else {
+        PASSCODE = '';
+        localStorage.removeItem('translator_passcode');
+        showCodeOverlay(true);
+      }
     }
   }, 100);
 
-  setInterval(() => { if (PASSCODE && !busy && !recordingLang) loadHistory(false); }, 8000);
+  // 端末間履歴の同期は少し間隔を伸ばして軽量化
+  setInterval(() => {
+    if (document.visibilityState === 'visible' && PASSCODE && !busy && !recordingLang) loadHistory(false);
+  }, 15000);
 
   async function ping() {
-    try { const r = await api({ action:'ping' }); return !!r.ok; }
-    catch(e) { toast('接続できません。'); return false; }
+    try {
+      const r = await api({ action:'ping' });
+      if (!r.ok) throw new Error(r.error || '接続確認に失敗しました。');
+      toast('接続OK', 900);
+      return true;
+    } catch(e) {
+      toast((e && e.message) ? e.message : '接続できません。', 5000);
+      return false;
+    }
   }
 
-  async function toggleRecord(lang) {
-    if (busy) return;
-    if (recordingLang) {
-      if (recordingLang === lang && recorder && recorder.state === 'recording') recorder.stop();
-      return;
-    }
+  function bindHoldToTalk(button, lang) {
+    button.addEventListener('contextmenu', e => e.preventDefault());
+
+    button.addEventListener('pointerdown', async (e) => {
+      if (busy || recordingLang) return;
+      e.preventDefault();
+      try { button.setPointerCapture(e.pointerId); } catch(_) {}
+      await unlockAudio();
+      startRecording(lang);
+    });
+
+    const stop = (e) => {
+      if (recordingLang !== lang) return;
+      e.preventDefault();
+      stopRecording();
+    };
+    button.addEventListener('pointerup', stop);
+    button.addEventListener('pointercancel', stop);
+    button.addEventListener('lostpointercapture', () => {
+      if (recordingLang === lang) stopRecording();
+    });
+
+    button.addEventListener('keydown', async (e) => {
+      if ((e.key === ' ' || e.key === 'Enter') && !recordingLang && !busy) {
+        e.preventDefault();
+        await unlockAudio();
+        startRecording(lang);
+      }
+    });
+    button.addEventListener('keyup', (e) => {
+      if ((e.key === ' ' || e.key === 'Enter') && recordingLang === lang) {
+        e.preventDefault();
+        stopRecording();
+      }
+    });
+  }
+
+  async function startRecording(lang) {
+    if (busy || recordingLang) return;
     try {
       const chosen = chooseMime();
-      stream = await navigator.mediaDevices.getUserMedia({ audio:{ echoCancellation:true, noiseSuppression:true, autoGainControl:true } });
+      stream = await navigator.mediaDevices.getUserMedia({
+        audio:{ echoCancellation:true, noiseSuppression:true, autoGainControl:true }
+      });
       chunks = [];
       recorder = chosen ? new MediaRecorder(stream,{mimeType:chosen}) : new MediaRecorder(stream);
       recordingLang = lang;
-      setMicState(lang,true);
-      toast('話してください。もう一度押すと送信します。');
+      setMicState(lang, true);
+
       recorder.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
       recorder.onstop = async () => {
-        clearTimeout(stopTimer); stopTimer = null;
+        clearTimeout(stopTimer);
+        stopTimer = null;
         const actualType = recorder.mimeType || chosen || 'audio/webm';
         const blob = new Blob(chunks,{type:actualType});
+        const sentLang = recordingLang || lang;
         cleanupRecorder();
-        await sendAudio(blob,lang,actualType);
+        if (blob.size >= 300) await sendAudio(blob, sentLang, actualType);
       };
+
       recorder.start();
-      stopTimer = setTimeout(() => { if (recorder && recorder.state === 'recording') recorder.stop(); },20000);
+      stopTimer = setTimeout(() => {
+        if (recorder && recorder.state === 'recording') stopRecording();
+      }, 15000);
     } catch(e) {
       cleanupRecorder();
-      toast('マイクを使えません。ブラウザのマイク許可を確認してください。',4500);
+      toast('マイクを使えません。マイクの許可を確認してください。', 4500);
     }
   }
 
-  async function sendAudio(blob,expectedLang,mimeType) {
-    if (!blob || blob.size < 300) return;
-    busy = true; disableControls(true); toast('翻訳しています…',60000);
+  function stopRecording() {
+    if (recorder && recorder.state === 'recording') {
+      recorder.stop();
+    }
+  }
+
+  async function sendAudio(blob, expectedLang, mimeType) {
+    busy = true;
+    disableControls(true);
+    toast('翻訳しています…', 60000);
+
     try {
       const base64 = await blobToBase64(blob);
-      const r = await api({ action:'translateAudio', room:ROOM, deviceId:DEVICE_ID, expectedLang, mimeType:(mimeType || blob.type || 'audio/webm').split(';')[0], audioBase64:base64 });
-      if (!r.ok) throw new Error(r.error || '翻訳に失敗しました。');
-      if (r.blocked) { showSystem(r.notice || 'このことばは表示しません。'); toast('安全フィルターで表示しませんでした。'); return; }
-      if (r.ignored) { if (r.notice) toast(r.notice); else toast('意味のあることばを聞き取れませんでした。'); return; }
-      if (r.message) { addMessage(r.message,true); await speakTarget(r.message); }
-    } catch(e) { toast(e.message || '翻訳に失敗しました。',5000); }
-    finally { busy = false; disableControls(false); hideToastSoon(); }
+      const r = await api({
+        action:'translateAudio',
+        room:ROOM,
+        deviceId:DEVICE_ID,
+        expectedLang,
+        mimeType:(mimeType || blob.type || 'audio/webm').split(';')[0],
+        audioBase64:base64
+      });
+      await handleTranslationResult(r);
+    } catch(e) {
+      toast(e.message || '翻訳に失敗しました。', 5000);
+    } finally {
+      busy = false;
+      disableControls(false);
+      hideToastSoon();
+    }
+  }
+
+  async function sendText() {
+    const text = textInput.value.trim();
+    if (!text || busy) return;
+
+    busy = true;
+    disableControls(true);
+    toast('翻訳しています…', 60000);
+
+    try {
+      const r = await api({
+        action:'translateText',
+        room:ROOM,
+        deviceId:DEVICE_ID,
+        expectedLang:textLang,
+        text
+      });
+      if (r.ok && !r.blocked && !r.ignored) textInput.value = '';
+      await handleTranslationResult(r);
+    } catch(e) {
+      toast(e.message || '翻訳に失敗しました。', 5000);
+    } finally {
+      busy = false;
+      disableControls(false);
+      hideToastSoon();
+      textInput.focus();
+    }
+  }
+
+  async function handleTranslationResult(r) {
+    if (!r || !r.ok) throw new Error((r && r.error) || '翻訳に失敗しました。');
+
+    if (r.blocked) {
+      showSystem(r.notice || 'このことばは表示しません。');
+      toast('安全フィルターで表示しませんでした。');
+      return;
+    }
+
+    if (r.ignored) {
+      if (r.notice) toast(r.notice);
+      else toast('意味のあることばを確認できませんでした。');
+      return;
+    }
+
+    if (r.message) {
+      addMessage(r.message, true);
+      // 表示を先に出し、音声は後から再生して「重さ」を感じにくくする
+      speakTarget(r.message);
+    }
   }
 
   async function sendQuick(type) {
     if (busy) return;
-    busy = true; disableControls(true);
+    busy = true;
+    disableControls(true);
     try {
-      const r = await api({ action:'quickReply', room:ROOM, deviceId:DEVICE_ID, quickType:type });
+      const r = await api({
+        action:'quickReply',
+        room:ROOM,
+        deviceId:DEVICE_ID,
+        quickType:type
+      });
       if (!r.ok) throw new Error(r.error || '送信できませんでした。');
-      addMessage(r.message,true); await speakTarget(r.message);
-    } catch(e) { toast(e.message || '送信できませんでした。',4000); }
-    finally { busy = false; disableControls(false); }
+      addMessage(r.message,true);
+      speakTarget(r.message);
+    } catch(e) {
+      toast(e.message || '送信できませんでした。',4000);
+    } finally {
+      busy = false;
+      disableControls(false);
+    }
   }
 
-  async function loadHistory(scrollToBottom) {
+  async function loadHistory(scroll) {
     try {
-      const r = await api({ action:'history', room:ROOM });
+      const r = await api({action:'history',room:ROOM});
       if (!r.ok) return;
       (r.messages || []).forEach(m => addMessage(m,false));
-      if (scrollToBottom) scrollBottom();
-    } catch(e) {}
+      if (scroll) scrollBottom();
+    } catch(_) {}
   }
 
-  function addMessage(m,scroll) {
+  function addMessage(m, scroll) {
     if (!m || !m.id || seen.has(m.id)) return;
     seen.add(m.id);
+
     const side = m.sourceLang === 'fil' ? 'left' : 'right';
-    const row = el('div','row '+side); row.dataset.id = m.id;
+    const row = el('div','row '+side);
     const bubble = el('div','bubble');
     const head = el('div','bubble-head');
-    head.append(el('div','lang',m.sourceLang === 'fil' ? '🇵🇭 タガログ語' : '🇯🇵 日本語'), el('div','time',formatTime(m.createdAt)));
+    head.append(
+      el('div','lang',m.sourceLang === 'fil' ? '🇵🇭 タガログ語' : '🇯🇵 日本語'),
+      el('div','time',formatTime(m.createdAt))
+    );
+
     const source = el('div','source',m.sourceText || '');
     const pron = el('div','pron',m.sourcePronunciation || '');
     const divider = el('div','divider');
     const line = el('div','translation-line');
     const trans = el('div','translation');
-    trans.append(el('div','label',m.targetLang === 'fil' ? 'タガログ語訳' : '日本語訳'), el('div','text',m.targetText || ''), el('div','pron',m.targetPronunciation || ''));
-    const speakBtn = el('button','speak','🔊'); speakBtn.type='button'; speakBtn.title='もう一度聞く'; speakBtn.addEventListener('click',() => speak(m.targetText,m.targetLang));
-    line.append(trans,speakBtn); bubble.append(head,source,pron,divider,line); row.append(bubble); chat.append(row);
+    trans.append(
+      el('div','label',m.targetLang === 'fil' ? 'タガログ語訳' : '日本語訳'),
+      el('div','text',m.targetText || ''),
+      el('div','pron',m.targetPronunciation || '')
+    );
+
+    const speakBtn = el('button','speak','🔊');
+    speakBtn.type = 'button';
+    speakBtn.title = 'もう一度聞く';
+    speakBtn.addEventListener('click', async () => {
+      await unlockAudio();
+      speak(m.targetText,m.targetLang);
+    });
+
+    line.append(trans,speakBtn);
+    bubble.append(head,source,pron,divider,line);
+    row.append(bubble);
+    chat.append(row);
     if (scroll) scrollBottom();
   }
 
-  async function speakTarget(m) { if (m && m.targetText) await speak(m.targetText,m.targetLang); }
+  async function speakTarget(m) {
+    if (m && m.targetText) await speak(m.targetText,m.targetLang);
+  }
 
   async function speak(text,lang) {
+    if (!text) return;
+
+    // まず端末内音声。見つからなければGAS側TTSへ。
     const locale = lang === 'fil' ? 'fil-PH' : 'ja-JP';
     const voice = findVoice(locale);
+
     if (voice && 'speechSynthesis' in window) {
-      speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang=locale; u.voice=voice; u.rate=.92; speechSynthesis.speak(u); return;
+      try {
+        speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = locale;
+        u.voice = voice;
+        u.rate = 0.92;
+        speechSynthesis.speak(u);
+        return;
+      } catch(_) {}
     }
+
+    const cacheKey = lang + '|' + text;
     try {
-      toast('音声を準備しています…',60000);
-      const r = await api({ action:'tts', text, lang });
-      if (!r.ok) throw new Error(r.error || '音声生成に失敗しました。');
-      playBase64Audio(r.audioBase64,r.mimeType || 'audio/wav'); hideToastSoon();
-    } catch(e) { toast('音声を再生できませんでした。文字は表示されています。',3500); }
+      let audio = audioCache.get(cacheKey);
+      if (!audio) {
+        toast('音声を準備しています…',60000);
+        const r = await api({action:'tts',text,lang});
+        if (!r.ok) throw new Error(r.error || '音声生成に失敗しました。');
+        audio = {b64:r.audioBase64,mime:r.mimeType || 'audio/wav'};
+        audioCache.set(cacheKey,audio);
+      }
+      await playBase64Audio(audio.b64,audio.mime);
+      hideToastSoon();
+    } catch(e) {
+      toast('音声を再生できません。🔊でもう一度試してください。',3500);
+    }
   }
 
   function findVoice(locale) {
@@ -250,40 +559,215 @@
     return voices.find(v => (v.lang || '').toLowerCase().startsWith(base)) || null;
   }
 
-  function playBase64Audio(b64,mime) {
-    const a = new Audio('data:'+mime+';base64,'+b64);
-    a.play().catch(() => toast('画面を一度タップしてから、🔊を押してください。',4000));
+  async function unlockAudio() {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') await audioCtx.resume();
+      const buffer = audioCtx.createBuffer(1,1,22050);
+      const source = audioCtx.createBufferSource();
+      source.buffer = buffer;
+      source.connect(audioCtx.destination);
+      source.start(0);
+    } catch(_) {}
+  }
+
+  async function playBase64Audio(b64,mime) {
+    await unlockAudio();
+    if (!audioCtx) throw new Error('AudioContext unavailable');
+
+    const binary = atob(b64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i=0;i<binary.length;i++) bytes[i] = binary.charCodeAt(i);
+
+    const decoded = await audioCtx.decodeAudioData(bytes.buffer.slice(0));
+    const src = audioCtx.createBufferSource();
+    src.buffer = decoded;
+    src.connect(audioCtx.destination);
+    src.start(0);
+  }
+
+  function setTextLang(lang) {
+    textLang = lang === 'fil' ? 'fil' : 'ja';
+    textJa.classList.toggle('active',textLang === 'ja');
+    textFil.classList.toggle('active',textLang === 'fil');
+    textInput.placeholder = textLang === 'ja'
+      ? '日本語を入力 → タガログ語へ'
+      : 'Tagalog → 日本語へ';
+    textInput.focus();
   }
 
   async function api(payload) {
     payload.passcode = PASSCODE;
-    const res = await fetch(GAS_URL,{ method:'POST', redirect:'follow', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(payload) });
-    const txt = await res.text();
-    let obj; try { obj = JSON.parse(txt); } catch(_) { throw new Error('GASから正しい返答がありません。'); }
-    if (!obj.ok && obj.error === '合言葉が違います。') { localStorage.removeItem('translator_passcode'); PASSCODE=''; showCodeOverlay(true); }
-    return obj;
+    await waitForBridge();
+
+    return new Promise((resolve,reject) => {
+      const requestId = 'r' + (++requestSeq) + '-' + Date.now();
+      const timer = setTimeout(() => {
+        pending.delete(requestId);
+        reject(new Error('GASとの通信がタイムアウトしました。'));
+      },45000);
+
+      pending.set(requestId,{resolve,reject,timer});
+      bridgeWindow.postMessage({
+        channel:CHANNEL,nonce:CLIENT_NONCE,type:'request',requestId,payload
+      },'*');
+    }).then(obj => {
+      if (!obj.ok && obj.error === '合言葉が違います。') {
+        localStorage.removeItem('translator_passcode');
+        PASSCODE = '';
+        showCodeOverlay(true);
+      }
+      return obj;
+    });
+  }
+
+  function installBridge() {
+    const iframe = document.createElement('iframe');
+    iframe.id='gasBridge';
+    iframe.setAttribute('aria-hidden','true');
+    iframe.style.position='fixed';
+    iframe.style.width='1px';
+    iframe.style.height='1px';
+    iframe.style.opacity='0';
+    iframe.style.pointerEvents='none';
+    iframe.style.left='-9999px';
+
+    const joiner = BRIDGE_BASE_URL.includes('?') ? '&' : '?';
+    iframe.src = BRIDGE_BASE_URL + joiner + 'mode=bridge&clientNonce=' + encodeURIComponent(CLIENT_NONCE);
+    document.body.appendChild(iframe);
+
+    window.addEventListener('message',event => {
+      const data = event.data || {};
+      if (data.channel !== CHANNEL || data.nonce !== CLIENT_NONCE) return;
+
+      if (data.type === 'ready') {
+        bridgeWindow = event.source;
+        bridgeReady = true;
+        window.dispatchEvent(new Event('translator-bridge-ready'));
+        return;
+      }
+
+      if (data.type === 'response' && data.requestId) {
+        const item = pending.get(data.requestId);
+        if (!item) return;
+        clearTimeout(item.timer);
+        pending.delete(data.requestId);
+        item.resolve(data.result || {ok:false,error:'空の返答です。'});
+      }
+    });
+  }
+
+  function waitForBridge() {
+    if (bridgeReady && bridgeWindow) return Promise.resolve();
+
+    return new Promise((resolve,reject) => {
+      const timer = setTimeout(() => {
+        window.removeEventListener('translator-bridge-ready',onReady);
+        reject(new Error('GAS Bridgeに接続できません。'));
+      },12000);
+
+      function onReady() {
+        clearTimeout(timer);
+        resolve();
+      }
+      window.addEventListener('translator-bridge-ready',onReady,{once:true});
+    });
   }
 
   function chooseMime() {
-    const candidates=['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/ogg'];
-    return candidates.find(x => window.MediaRecorder && MediaRecorder.isTypeSupported(x)) || '';
+    const c=['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/ogg'];
+    return c.find(x => window.MediaRecorder && MediaRecorder.isTypeSupported(x)) || '';
   }
-  function blobToBase64(blob) { return new Promise((resolve,reject) => { const fr=new FileReader(); fr.onload=()=>resolve(String(fr.result).split(',')[1]||''); fr.onerror=reject; fr.readAsDataURL(blob); }); }
-  function cleanupRecorder() { clearTimeout(stopTimer); stopTimer=null; if(stream) stream.getTracks().forEach(t=>t.stop()); stream=null; recorder=null; const oldLang=recordingLang; recordingLang=null; setMicState(oldLang,false); }
+
+  function blobToBase64(blob) {
+    return new Promise((resolve,reject) => {
+      const fr=new FileReader();
+      fr.onload=()=>resolve(String(fr.result).split(',')[1] || '');
+      fr.onerror=reject;
+      fr.readAsDataURL(blob);
+    });
+  }
+
+  function cleanupRecorder() {
+    clearTimeout(stopTimer);
+    stopTimer=null;
+    if (stream) stream.getTracks().forEach(t=>t.stop());
+    stream=null;recorder=null;
+    const old=recordingLang;
+    recordingLang=null;
+    setMicState(old,false);
+  }
+
   function setMicState(lang,on) {
     [micJa,micFil].forEach(b=>b.classList.remove('recording'));
-    if(!on){ micJa.textContent='🎙 日本語で話す'; micFil.textContent='🎙 タガログ語で話す'; return; }
-    const b=lang==='fil'?micFil:micJa; b.classList.add('recording'); b.textContent='⏹ 話し終わったら押す';
+    micJa.innerHTML='🎙 日本語で話す<span class="sub">押している間だけ録音</span>';
+    micFil.innerHTML='🎙 タガログ語で話す<span class="sub">Pindutin habang nagsasalita</span>';
+
+    if (!on) return;
+    const b=lang === 'fil' ? micFil : micJa;
+    b.classList.add('recording');
+    b.innerHTML=lang === 'fil'
+      ? '🔴 録音中…<span class="sub">離すと翻訳します</span>'
+      : '🔴 ろくおん中…<span class="sub">はなしたら指を離してね</span>';
   }
-  function disableControls(disabled){ document.querySelectorAll('#controls button').forEach(b=>{b.disabled=disabled;b.style.opacity=disabled?'.58':'1';}); }
-  function showSystem(text){ if(!text)return; const d=el('div','system',text); chat.append(d); scrollBottom(); }
-  function scrollBottom(){ requestAnimationFrame(()=>{chat.scrollTop=chat.scrollHeight;}); }
-  function formatTime(iso){ const d=new Date(iso); if(Number.isNaN(d.getTime()))return''; return d.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}); }
-  function toast(text,ms=2500){ statusEl.textContent=text; statusEl.classList.add('show'); clearTimeout(statusEl._timer); if(ms<60000) statusEl._timer=setTimeout(()=>statusEl.classList.remove('show'),ms); }
-  function hideToastSoon(){ clearTimeout(statusEl._timer); statusEl._timer=setTimeout(()=>statusEl.classList.remove('show'),700); }
-  function showCodeOverlay(show){ document.getElementById('codeOverlay').classList.toggle('show',!!show); if(show)setTimeout(()=>document.getElementById('passInput').focus(),100); }
-  function el(tag,cls,text){ const e=document.createElement(tag); if(cls)e.className=cls; if(text!==undefined)e.textContent=text; return e; }
-  function getDeviceId(){ let id=localStorage.getItem('translator_device_id'); if(!id){ id=(crypto.randomUUID?crypto.randomUUID():'d-'+Date.now()+'-'+Math.random().toString(36).slice(2)); localStorage.setItem('translator_device_id',id);} return id; }
+
+  function disableControls(disabled) {
+    document.querySelectorAll('#controls button').forEach(b => {
+      b.disabled=disabled;
+      b.style.opacity=disabled?'.58':'1';
+    });
+    textInput.disabled=disabled;
+  }
+
+  function showSystem(text) {
+    if (!text) return;
+    const d=el('div','system',text);
+    chat.append(d);
+    scrollBottom();
+  }
+
+  function scrollBottom() {
+    requestAnimationFrame(()=>{ chat.scrollTop=chat.scrollHeight; });
+  }
+
+  function formatTime(iso) {
+    const d=new Date(iso);
+    if(Number.isNaN(d.getTime())) return '';
+    return d.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
+  }
+
+  function toast(text,ms=2500) {
+    statusEl.textContent=text;
+    statusEl.classList.add('show');
+    clearTimeout(statusEl._timer);
+    if(ms<60000) statusEl._timer=setTimeout(()=>statusEl.classList.remove('show'),ms);
+  }
+
+  function hideToastSoon() {
+    clearTimeout(statusEl._timer);
+    statusEl._timer=setTimeout(()=>statusEl.classList.remove('show'),650);
+  }
+
+  function showCodeOverlay(show) {
+    document.getElementById('codeOverlay').classList.toggle('show',!!show);
+    if(show) setTimeout(()=>document.getElementById('passInput').focus(),100);
+  }
+
+  function el(tag,cls,text) {
+    const e=document.createElement(tag);
+    if(cls) e.className=cls;
+    if(text!==undefined) e.textContent=text;
+    return e;
+  }
+
+  function getDeviceId() {
+    let id=localStorage.getItem('translator_device_id');
+    if(!id){
+      id=(crypto.randomUUID?crypto.randomUUID():'d-'+Date.now()+'-'+Math.random().toString(36).slice(2));
+      localStorage.setItem('translator_device_id',id);
+    }
+    return id;
+  }
 })();
 </script>
 </body>
